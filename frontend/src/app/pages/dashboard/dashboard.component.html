@@ -1,0 +1,90 @@
+<div class="layout">
+  <div class="sidebar">
+    <h3>🏦 Panel Bancario</h3>
+    <a href="/dashboard">🏠 Inicio</a>
+    <a href="/cards" class="active">💳 Tarjetas</a>
+    <button class="btn-logout" (click)="logout()">Cerrar sesión</button>
+  </div>
+
+  <div class="content">
+    <div class="top-bar">
+      <h1>💳 Tarjetas de Crédito</h1>
+      <button class="btn-new" (click)="openCreate()">+ Nueva Tarjeta</button>
+    </div>
+
+    <div *ngIf="successMsg" class="alert-success">{{successMsg}}</div>
+
+    <input class="search-input" [(ngModel)]="search"
+      (ngModelChange)="filterCards()"
+      placeholder="🔍 Buscar por nombre, cédula o ID...">
+
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>ID</th><th>Logo</th><th>Nombre</th><th>Cédula</th>
+            <th>Descripción</th><th>Liberación</th><th>Caducidad</th><th>Acciones</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let card of filtered">
+            <td class="mono">{{card.cardId}}</td>
+            <td>
+              <img *ngIf="card.logo" class="logo-img" [src]="card.logo">
+              <span *ngIf="!card.logo" class="no-logo">—</span>
+            </td>
+            <td>{{card.name}}</td>
+            <td class="mono">{{card.cedula}}</td>
+            <td>{{card.description}}</td>
+            <td>{{card.issueDate | date:'dd/MM/yyyy'}}</td>
+            <td>{{card.expiryDate | date:'dd/MM/yyyy'}}</td>
+            <td>
+              <button class="btn-edit" (click)="openEdit(card)">Editar</button>
+              <button class="btn-delete" (click)="delete(card._id)">Eliminar</button>
+            </td>
+          </tr>
+          <tr *ngIf="filtered.length === 0">
+            <td colspan="8" style="text-align:center;padding:24px;color:#a0aec0">No hay tarjetas</td>
+          </tr>
+        </tbody>
+        <tfoot>
+          <tr><td colspan="8">Total: <strong>{{filtered.length}}</strong> registros</td></tr>
+        </tfoot>
+      </table>
+    </div>
+  </div>
+</div>
+
+<div *ngIf="showForm" class="modal-overlay">
+  <div class="modal">
+    <h2>{{editMode ? '✏️ Editar' : '➕ Nueva'}} Tarjeta</h2>
+    <div *ngIf="errorMsg" class="alert-error">⚠️ {{errorMsg}}</div>
+
+    <label class="form-label">Nombre del cliente</label>
+    <input class="form-input" [(ngModel)]="form.name" placeholder="Solo letras, 5-50 caracteres">
+
+    <label class="form-label">Cédula (10 dígitos)</label>
+    <input class="form-input" [(ngModel)]="form.cedula" placeholder="1234567890" maxlength="10">
+
+    <label class="form-label">Descripción (10-100 caracteres)</label>
+    <textarea class="form-input" [(ngModel)]="form.description" placeholder="Descripción de la tarjeta"></textarea>
+
+    <label class="form-label">Fecha de Liberación (opcional)</label>
+    <input class="form-input" type="date" [(ngModel)]="form.issueDate" (ngModelChange)="onIssueDateChange()">
+    <div *ngIf="expiryPreview" class="expiry-preview">📅 Caducidad: <strong>{{expiryPreview}}</strong></div>
+
+    <label class="form-label">Logo (URL)</label>
+    <div class="logo-tabs">
+      <button type="button" [class.active]="logoMode==='url'" (click)="logoMode='url'">🔗 URL</button>
+      <button type="button" [class.active]="logoMode==='file'" (click)="logoMode='file'">📁 Archivo</button>
+    </div>
+    <input *ngIf="logoMode==='url'" class="form-input" [(ngModel)]="form.logo" placeholder="https://...">
+    <input *ngIf="logoMode==='file'" class="form-input" type="file" accept="image/*" (change)="onFileChange($event)">
+    <img *ngIf="form.logo" [src]="form.logo" class="logo-preview">
+
+    <div class="modal-actions">
+      <button class="btn-save" (click)="save()">{{editMode ? 'Actualizar' : 'Guardar'}}</button>
+      <button class="btn-cancel" (click)="showForm=false">Cancelar</button>
+    </div>
+  </div>
+</div>

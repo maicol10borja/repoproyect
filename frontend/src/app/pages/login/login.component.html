@@ -1,0 +1,19 @@
+<div class="login-wrap">
+  <div class="login-card">
+    <div class="login-logo">💳</div>
+    <h2>Panel Bancario</h2>
+    <p>Gestión de Tarjetas de Crédito</p>
+
+    <div *ngIf="errorMsg" class="alert-error">⚠️ {{ errorMsg }}</div>
+
+    <label>Usuario</label>
+    <input type="text" [(ngModel)]="username" placeholder="admin" (keyup.enter)="login()" />
+
+    <label>Contraseña</label>
+    <input type="password" [(ngModel)]="password" placeholder="••••••••" (keyup.enter)="login()" />
+
+    <button [disabled]="loading" (click)="login()">
+      {{ loading ? 'Ingresando...' : 'Ingresar' }}
+    </button>
+  </div>
+</div>
