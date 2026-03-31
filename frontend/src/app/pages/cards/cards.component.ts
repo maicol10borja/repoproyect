@@ -6,7 +6,7 @@ import { DashboardComponent } from '../dashboard/dashboard.component';
 import { ConfirmModalComponent } from '../../components/confirm-modal/confirm-modal.component';
 
 
-const BASE = 'https://artist-generator-became-expanded.trycloudflare.com/api';
+const BASE = 'https://tarjetas-backend.onrender.com/api';
 
 interface Notif {
   type: 'success' | 'info' | 'error';

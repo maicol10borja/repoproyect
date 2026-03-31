@@ -8,7 +8,8 @@ import { Observable, of } from 'rxjs';
 @Injectable({ providedIn: 'root' })
 export class ApiService {
 
-  private base = 'https://artist-generator-became-expanded.trycloudflare.com/api';
+
+  private base = 'https://tarjetas-backend.onrender.com/api';
 
   constructor(
     private http: HttpClient,
