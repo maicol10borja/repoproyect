@@ -1,3 +1,5 @@
+//Arranca MDV
+
 const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
@@ -11,6 +13,7 @@ app.use(express.urlencoded({ limit: '50mb', extended: true }));
 
 app.use('/api/auth', require('./routes/auth'));
 app.use('/api/cards', require('./routes/cards'));
+app.use('/api/activity', require('./routes/activity'));
 
 mongoose.connect(process.env.MONGO_URI)
   .then(() => console.log('Mongo conectado'))

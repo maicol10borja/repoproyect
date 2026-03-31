@@ -1,3 +1,5 @@
+//Centraliza todas las llamadas HTTP al backend AGG
+
 import { Injectable, Inject, PLATFORM_ID } from '@angular/core';
 import { isPlatformBrowser } from '@angular/common';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
@@ -5,12 +7,13 @@ import { Observable, of } from 'rxjs';
 
 @Injectable({ providedIn: 'root' })
 export class ApiService {
-  private base = 'http://localhost:3000/api';
+
+  private base = 'https://artist-generator-became-expanded.trycloudflare.com/api';
 
   constructor(
     private http: HttpClient,
     @Inject(PLATFORM_ID) private platformId: Object
-  ) {}
+  ) { }
 
   private isBrowser(): boolean {
     return isPlatformBrowser(this.platformId);

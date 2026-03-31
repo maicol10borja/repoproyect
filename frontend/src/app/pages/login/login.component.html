@@ -1,19 +1,31 @@
 <div class="login-wrap">
   <div class="login-card">
-    <div class="login-logo">💳</div>
+
+    <div class="login-icon">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <rect x="1" y="4" width="22" height="16" rx="2" ry="2"/>
+        <line x1="1" y1="10" x2="23" y2="10"/>
+      </svg>
+    </div>
+
     <h2>Panel Bancario</h2>
     <p>Gestión de Tarjetas de Crédito</p>
 
     <div *ngIf="errorMsg" class="alert-error">⚠️ {{ errorMsg }}</div>
 
-    <label>Usuario</label>
-    <input type="text" [(ngModel)]="username" placeholder="admin" (keyup.enter)="login()" />
+    <div class="login-field">
+      <label>Usuario</label>
+      <input type="text" [(ngModel)]="username" placeholder="Ingresa tu usuario" (keyup.enter)="login()"/>
+    </div>
 
-    <label>Contraseña</label>
-    <input type="password" [(ngModel)]="password" placeholder="••••••••" (keyup.enter)="login()" />
+    <div class="login-field">
+      <label>Contraseña</label>
+      <input type="password" [(ngModel)]="password" placeholder="••••••••" (keyup.enter)="login()"/>
+    </div>
 
     <button [disabled]="loading" (click)="login()">
       {{ loading ? 'Ingresando...' : 'Ingresar' }}
     </button>
+
   </div>
 </div>

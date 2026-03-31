@@ -1,111 +1,287 @@
 <div class="layout" [class.collapsed]="isCollapsed">
-  <div class="sidebar">
-    <div class="sidebar-header">
-      <span class="brand" *ngIf="!isCollapsed">🏦 Panel Bancario</span>
-      <button type="button" class="toggle-btn" (click)="isCollapsed = !isCollapsed">
-        {{ isCollapsed ? '▶' : '◀' }}
-      </button>
-    </div>
-    <a routerLink="/dashboard">
-      <span class="icon">🏠</span>
-      <span class="label" *ngIf="!isCollapsed">Inicio</span>
-    </a>
-    <a routerLink="/cards" routerLinkActive="active">
-      <span class="icon">💳</span>
-      <span class="label" *ngIf="!isCollapsed">Tarjetas</span>
-    </a>
-    <button type="button" class="btn-logout" (click)="logout()">
-      <span class="icon">🚪</span >
-      <span class="label" *ngIf="!isCollapsed">Cerrar sesión</span>
-    </button>
-  </div>
+  <app-dashboard></app-dashboard>
 
   <div class="content">
     <div class="top-bar">
-      <h1>💳 Tarjetas de Crédito</h1>
-      <button type="button" class="btn-new" (click)="openCreate()">+ Nueva Tarjeta</button>
+      <h1>
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg>
+        Tarjetas de Crédito
+      </h1>
+      <div class="top-bar-right">
+
+
+        <div class="bell-wrap">
+          <button class="bell-btn" type="button" (click)="togglePanel($event)">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/>
+              <path d="M13.73 21a2 2 0 0 1-3.46 0"/>
+            </svg>
+            <span class="bell-badge" *ngIf="unreadCount > 0">{{unreadCount}}</span>
+          </button>
+
+          <div class="notif-dropdown" *ngIf="showPanel" (click)="$event.stopPropagation()">
+            <div class="notif-dropdown-header">
+              <span class="notif-dropdown-title">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+                Notificaciones
+              </span>
+              <button class="clear-btn" *ngIf="notifs.length > 0" (click)="clearNotifs()">Limpiar</button>
+            </div>
+            <div class="notif-dropdown-list">
+              <div *ngIf="notifs.length === 0" class="notif-empty">
+                <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+                Sin notificaciones
+              </div>
+              <div class="notif-item" *ngFor="let n of notifs">
+                <div class="notif-dot" [class.s]="n.type==='success'" [class.i]="n.type==='info'" [class.e]="n.type==='error'"></div>
+                <div class="notif-body">
+                  <div class="notif-title">{{n.title}}</div>
+                  <div class="notif-sub">{{n.sub}}</div>
+                  <div class="notif-time">{{n.time}}</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <button *ngIf="canEdit" type="button" class="btn-new" (click)="openCreate()">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+          Nueva Tarjeta
+        </button>
+      </div>
     </div>
 
-    <div *ngIf="successMsg" class="alert-success">{{successMsg}}</div>
 
     <input class="search-input" [(ngModel)]="search"
       (ngModelChange)="filterCards()"
-      placeholder="🔍 Buscar por nombre, cédula o ID...">
+      placeholder="Buscar por nombre, cédula o ID...">
 
-    <div class="table-wrap">
-      <table>
-        <thead>
-          <tr>
-            <th>ID</th><th>Logo</th><th>Nombre</th><th>Cédula</th>
-            <th>Descripción</th><th>Liberación</th><th>Caducidad</th><th>Acciones</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr *ngFor="let card of filtered">
-            <td class="mono">{{card.cardId}}</td>
-            <td>
-              <img *ngIf="card.logo" class="logo-img" [src]="card.logo">
-              <span *ngIf="!card.logo" class="no-logo">—</span>
-            </td>
-            <td>{{card.name}}</td>
-            <td class="mono">{{card.cedula}}</td>
-            <td>{{card.description}}</td>
-            <td>{{card.issueDate | date:'dd/MM/yyyy'}}</td>
-            <td>{{card.expiryDate | date:'dd/MM/yyyy'}}</td>
-            <td>
-              <button type="button" class="btn-edit" (click)="openEdit(card)">✏️ Editar</button>
-              <button type="button" class="btn-delete" (click)="delete(card._id)">🗑️ Eliminar</button>
-            </td>
-          </tr>
-          <tr *ngIf="filtered.length === 0">
-            <td colspan="8" style="text-align:center;padding:24px;color:#a0aec0">No hay tarjetas registradas</td>
-          </tr>
-        </tbody>
-        <tfoot>
-          <tr><td colspan="8">Total: <strong>{{filtered.length}}</strong> registros</td></tr>
-        </tfoot>
-      </table>
+    <div class="cards-grid">
+      <div *ngFor="let card of filtered; let i = index">
+        <div class="credit-card card-bg-{{(i % 7) + 1}}">
+          <div class="card-circle1"></div>
+          <div class="card-circle2"></div>
+          <div class="card-top">
+            <div>
+              <div class="card-bank">
+                <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg>
+                BancoEC
+              </div>
+              <div class="card-id-badge">{{card.cardId}}</div>
+            </div>
+            <div class="card-logo" *ngIf="card.logo">
+              <img [src]="card.logo" alt="logo" (error)="onImgError($event)">
+            </div>
+            <div class="card-logo card-logo-initials" *ngIf="!card.logo">
+              {{card.name?.substring(0,2)?.toUpperCase()}}
+            </div>
+          </div>
+
+          <div class="chip">
+            <div class="chip-line chip-h"></div>
+            <div class="chip-line chip-v"></div>
+            <div class="chip-inner"></div>
+          </div>
+          <div class="card-number">{{formatCardNumber(card.cedula, card.cardId)}}</div>
+          <div class="card-bottom">
+            <div class="card-holder">
+              <div class="card-label">Titular</div>
+              <div class="card-name">{{card.name?.toUpperCase()}}</div>
+              <div class="card-desc">{{card.description}}</div>
+            </div>
+            <div class="card-dates">
+              <div class="card-label">Desde</div>
+              <div class="card-expiry">{{card.issueDate | date:'MM/yy'}}</div>
+              <div class="card-label">Caduca</div>
+              <div class="card-expiry">{{card.expiryDate | date:'MM/yy'}}</div>
+            </div>
+          </div>
+          <div class="card-actions" *ngIf="canEdit || canDelete">
+            <button *ngIf="canEdit" type="button" class="btn-edit" (click)="openEdit(card)">
+              <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+              Editar
+            </button>
+            <button *ngIf="canDelete" type="button" class="btn-delete" (click)="promptDelete(card._id)">
+              <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg>
+              Eliminar
+            </button>
+          </div>
+        </div>
+      </div>
+      <div *ngIf="filtered.length === 0" class="no-cards">
+        <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg>
+        <span>No hay tarjetas registradas</span>
+      </div>
+    </div>
+    <div class="cards-total">
+      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="5" width="20" height="14" rx="2"/></svg>
+      Total: <strong>{{filtered.length}}</strong> tarjetas
     </div>
   </div>
 </div>
 
-<!-- MODAL -->
+<!-- Toasts -->
+<div class="toast-wrap">
+  <div class="toast" *ngFor="let t of toasts"
+    [class.toast-s]="t.type==='success'"
+    [class.toast-i]="t.type==='info'"
+    [class.toast-e]="t.type==='error'">
+    <div class="toast-dot" [class.s]="t.type==='success'" [class.i]="t.type==='info'" [class.e]="t.type==='error'"></div>
+    <div>
+      <div class="toast-title">{{t.title}}</div>
+      <div class="toast-sub">{{t.sub}}</div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal -->
 <div *ngIf="showForm" class="modal-overlay">
   <div class="modal">
-    <h2>{{editMode ? '✏️ Editar' : '➕ Nueva'}} Tarjeta</h2>
-    <div *ngIf="errorMsg" class="alert-error">⚠️ {{errorMsg}}</div>
+    <h2>
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <ng-container *ngIf="editMode"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></ng-container>
+        <ng-container *ngIf="!editMode"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="12" y1="9" x2="12" y2="15"/><line x1="9" y1="12" x2="15" y2="12"/></ng-container>
+      </svg>
+      {{editMode ? 'Editar' : 'Nueva'}} Tarjeta
+    </h2>
 
-    <label class="form-label">Nombre del cliente</label>
-    <input class="form-input" [(ngModel)]="form.name" placeholder="Solo letras, 5-50 caracteres" [disabled]="saving">
-
-    <label class="form-label">Cédula ecuatoriana</label>
-    <input class="form-input" [(ngModel)]="form.cedula" placeholder="10 dígitos" maxlength="10" [disabled]="saving">
-
-    <label class="form-label">Descripción (10-100 caracteres)</label>
-    <textarea class="form-input" [(ngModel)]="form.description" placeholder="Descripción de la tarjeta" [disabled]="saving"></textarea>
-
-    <label class="form-label">Fecha de Liberación</label>
-    <input class="form-input" type="date" [(ngModel)]="form.issueDate" (ngModelChange)="onIssueDateChange()" [disabled]="saving">
-    <div *ngIf="expiryPreview" class="expiry-preview">
-      📅 Caducidad automática: <strong>{{expiryPreview}}</strong>
+    <div class="form-group">
+      <label class="form-label">
+        <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="8" r="5"/><path d="M20 21a8 8 0 1 0-16 0"/></svg>
+        Nombre del cliente
+      </label>
+      <input class="form-input" [class.input-error]="fieldError['name']"
+        [(ngModel)]="form.name" placeholder="Solo letras, 5-50 caracteres"
+        [disabled]="saving" (ngModelChange)="clearFieldError('name')">
+      <div *ngIf="fieldError['name']" class="field-error-msg"><span class="error-dot"></span>{{fieldError['name']}}</div>
     </div>
 
-    <label class="form-label">Logo</label>
-    <div class="logo-tabs">
-      <button type="button" [class.active]="logoMode==='url'" (click)="logoMode='url'; form.logo=''" [disabled]="saving">🔗 URL</button>
-      <button type="button" [class.active]="logoMode==='file'" (click)="logoMode='file'; form.logo=''" [disabled]="saving">📁 Archivo</button>
+    <div class="form-group">
+      <label class="form-label">
+        <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="3" y="4" width="18" height="16" rx="2"/><line x1="7" y1="9" x2="17" y2="9"/><line x1="7" y1="13" x2="13" y2="13"/></svg>
+        Cédula ecuatoriana
+      </label>
+      <input class="form-input" [class.input-error]="fieldError['cedula']"
+        [(ngModel)]="form.cedula" placeholder="10 dígitos" maxlength="10"
+        [disabled]="saving" (ngModelChange)="clearFieldError('cedula')">
+      <div *ngIf="fieldError['cedula']" class="field-error-msg"><span class="error-dot"></span>{{fieldError['cedula']}}</div>
     </div>
-    <input *ngIf="logoMode==='url'" class="form-input" [(ngModel)]="form.logo" placeholder="https://..." [disabled]="saving">
-    <input *ngIf="logoMode==='file'" class="form-input" type="file" accept="image/*" (change)="onFileChange($event)" [disabled]="saving">
-    <img *ngIf="form.logo" [src]="form.logo" class="logo-preview">
+
+    <div class="form-group">
+      <label class="form-label">
+        <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="15" y2="18"/></svg>
+        Descripción (10-100 caracteres)
+      </label>
+      <textarea class="form-input" [class.input-error]="fieldError['description']"
+        [(ngModel)]="form.description" placeholder="Descripción de la tarjeta"
+        [disabled]="saving" (ngModelChange)="clearFieldError('description')"></textarea>
+      <div *ngIf="fieldError['description']" class="field-error-msg"><span class="error-dot"></span>{{fieldError['description']}}</div>
+    </div>
+
+    <div class="form-group">
+      <label class="form-label">
+        <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="3" y1="10" x2="21" y2="10"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="16" y1="2" x2="16" y2="6"/></svg>
+        Fecha de Liberación
+      </label>
+      <input class="form-input" [class.input-error]="fieldError['issueDate']"
+        type="date" [(ngModel)]="form.issueDate"
+        (ngModelChange)="onIssueDateChange(); clearFieldError('issueDate')"
+        [min]="minDate" [max]="maxDate" [disabled]="saving">
+      <div *ngIf="fieldError['issueDate']" class="field-error-msg"><span class="error-dot"></span>{{fieldError['issueDate']}}</div>
+      <div *ngIf="expiryPreview" class="expiry-preview">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+        Caducidad automática: <strong>{{expiryPreview}}</strong>
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label class="form-label">
+        <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="3"/><path d="M3 7V5a2 2 0 0 1 2-2h2"/><path d="M17 3h2a2 2 0 0 1 2 2v2"/><path d="M21 17v2a2 2 0 0 1-2 2h-2"/><path d="M7 21H5a2 2 0 0 1-2-2v-2"/></svg>
+        Logo
+      </label>
+
+      <div class="logo-tabs">
+        <button type="button" [class.active]="logoMode==='url'"
+          (click)="setLogoMode('url')" [disabled]="saving">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
+          URL
+        </button>
+        <button type="button" [class.active]="logoMode==='file'"
+          (click)="setLogoMode('file')" [disabled]="saving">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+          Archivo
+        </button>
+      </div>
+
+      <ng-container *ngIf="logoMode==='url'">
+        <div class="url-field-wrap">
+          <input class="form-input"
+            [class.input-error]="fieldError['logo'] || urlValid===false"
+            [class.input-ok]="urlValid===true"
+            [ngModel]="form.logo" (ngModelChange)="onUrlChange($event)"
+            placeholder="https://ejemplo.com/logo.png" [disabled]="saving">
+          <div class="url-status" *ngIf="urlValidating"><span class="url-spin"></span> Verificando...</div>
+          <div class="url-status ok" *ngIf="urlValid===true && !urlValidating">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+            Imagen válida
+          </div>
+          <div class="url-status err" *ngIf="urlValid===false && !urlValidating">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+            No se pudo cargar la imagen
+          </div>
+        </div>
+        <div *ngIf="fieldError['logo']" class="field-error-msg"><span class="error-dot"></span>{{fieldError['logo']}}</div>
+      </ng-container>
+
+      <ng-container *ngIf="logoMode==='file'">
+        <div class="file-drop-zone"
+          [class.drag-over]="isDragging"
+          (dragover)="onDragOver($event)"
+          (dragleave)="isDragging=false"
+          (drop)="onFileDrop($event)">
+          <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+          <span>Arrastra tu imagen aquí o</span>
+          <label class="file-browse-btn">
+            Seleccionar archivo
+            <input type="file" accept="image/*" (change)="onFileChange($event)" [disabled]="saving" style="display:none">
+          </label>
+          <span class="file-hint">PNG, JPG, WEBP — máx 2MB</span>
+        </div>
+      </ng-container>
+
+      <div class="logo-preview-area" *ngIf="form.logo">
+        <div class="logo-preview-card">
+          <div class="logo-preview-label">Vista previa</div>
+          <div class="logo-preview-mock">
+            <img [src]="form.logo" class="logo-preview-img" alt="preview" (error)="onImgError($event)">
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div *ngIf="errorMsg" class="alert-error">
+      <span class="error-icon">!</span> {{errorMsg}}
+    </div>
 
     <div class="modal-actions">
       <button type="button" class="btn-save" (click)="save()" [disabled]="saving">
+        <svg *ngIf="!saving" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
         {{saving ? 'Guardando...' : (editMode ? 'Actualizar' : 'Guardar')}}
       </button>
-      <button type="button" class="btn-cancel" (click)="showForm=false; saving=false" [disabled]="saving">
-        Cancelar
-      </button>
+      <button type="button" class="btn-cancel"
+        (click)="showForm=false; saving=false; errorMsg=''; fieldError={}"
+        [disabled]="saving">Cancelar</button>
     </div>
   </div>
 </div>
+
+<app-confirm-modal 
+  *ngIf="cardToDeleteId"
+  title="Eliminar Tarjeta"
+  message="¿Estás seguro de que deseas eliminar permanentemente esta tarjeta? Esta acción no se puede deshacer."
+  confirmText="Eliminar"
+  cancelText="Cancelar"
+  type="danger"
+  (confirm)="confirmDelete()"
+  (cancel)="cancelDelete()">
+</app-confirm-modal>

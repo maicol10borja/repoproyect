@@ -1,20 +1,22 @@
 const router = require('express').Router();
 const Card = require('../models/Card');
 const { generateCardId } = require('../models/Card');
+const Activity = require('../models/Activity');
 const auth = require('../middleware/auth');
+const { requireRole } = require('../middleware/auth');
 
-// GET todas
+// GET — todos los roles pueden ver
 router.get('/', auth, async (req, res) => {
   try {
     const cards = await Card.find().sort({ createdAt: -1 });
     res.json(cards);
-  } catch(e) {
+  } catch (e) {
     res.status(500).json({ message: e.message });
   }
 });
 
-// POST crear
-router.post('/', auth, async (req, res) => {
+// POST — solo admin y agente
+router.post('/', auth, requireRole('admin', 'agente'), async (req, res) => {
   try {
     const issueDate = req.body.issueDate ? new Date(req.body.issueDate) : new Date();
     const expiryDate = new Date(issueDate);
@@ -29,15 +31,23 @@ router.post('/', auth, async (req, res) => {
 
     await card.save();
     console.log('✅ CREADA:', card.cardId);
+    
+    await Activity.create({
+      username: req.user.username,
+      role: req.user.role,
+      actionType: 'CREATE',
+      details: `Creó la tarjeta: ${card.cardId}`
+    }).catch(err => console.error('Error logging activity', err));
+
     res.json(card);
-  } catch(e) {
+  } catch (e) {
     console.error('❌ ERROR POST:', e.message);
     res.status(400).json({ message: e.message });
   }
 });
 
-// PUT actualizar
-router.put('/:id', auth, async (req, res) => {
+// PUT — solo admin y agente
+router.put('/:id', auth, requireRole('admin', 'agente'), async (req, res) => {
   try {
     const card = await Card.findById(req.params.id);
     if (!card) return res.status(404).json({ message: 'No encontrada' });
@@ -56,19 +66,38 @@ router.put('/:id', auth, async (req, res) => {
 
     await card.save();
     console.log('✅ ACTUALIZADA:', card.cardId);
+
+    await Activity.create({
+      username: req.user.username,
+      role: req.user.role,
+      actionType: 'UPDATE',
+      details: `Modificó la tarjeta: ${card.cardId}`
+    }).catch(err => console.error('Error logging activity', err));
+
     res.json(card);
-  } catch(e) {
+  } catch (e) {
     console.error('❌ ERROR PUT:', e.message);
     res.status(400).json({ message: e.message });
   }
 });
 
-// DELETE
-router.delete('/:id', auth, async (req, res) => {
+// DELETE — solo admin
+router.delete('/:id', auth, requireRole('admin'), async (req, res) => {
   try {
+    const card = await Card.findById(req.params.id);
+    if (!card) return res.status(404).json({ message: 'No encontrada' });
+    
     await Card.findByIdAndDelete(req.params.id);
+    
+    await Activity.create({
+      username: req.user.username,
+      role: req.user.role,
+      actionType: 'DELETE',
+      details: `Eliminó permanentemente la tarjeta: ${card.cardId}`
+    }).catch(err => console.error('Error logging activity', err));
+
     res.json({ message: 'Eliminado' });
-  } catch(e) {
+  } catch (e) {
     res.status(500).json({ message: e.message });
   }
 });

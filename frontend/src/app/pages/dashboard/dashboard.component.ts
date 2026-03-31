@@ -1,47 +1,52 @@
-import { Component } from '@angular/core';
-import { Router, RouterLink, RouterLinkActive } from '@angular/router';
+import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { Router, RouterLink, RouterLinkActive } from '@angular/router';
+import { ConfirmModalComponent } from '../../components/confirm-modal/confirm-modal.component';
 
 @Component({
   selector: 'app-dashboard',
   standalone: true,
-  imports: [RouterLink, RouterLinkActive, CommonModule],
-  styleUrls: ['./dashboard.component.css'],
-  template: `
-    <div class="layout" [class.collapsed]="isCollapsed">
-      <div class="sidebar">
-        <div class="sidebar-header">
-          <span class="brand" *ngIf="!isCollapsed">🏦 Panel Bancario</span>
-          <button class="toggle-btn" (click)="isCollapsed = !isCollapsed">
-            {{ isCollapsed ? '▶' : '◀' }}
-          </button>
-        </div>
-        <a routerLink="/dashboard" routerLinkActive="active" [routerLinkActiveOptions]="{exact:true}">
-          <span class="icon">🏠</span>
-          <span class="label" *ngIf="!isCollapsed">Inicio</span>
-        </a>
-        <a routerLink="/cards" routerLinkActive="active">
-          <span class="icon">💳</span>
-          <span class="label" *ngIf="!isCollapsed">Tarjetas</span>
-        </a>
-        <button class="btn-logout" (click)="logout()">
-          <span class="icon">🚪</span>
-          <span class="label" *ngIf="!isCollapsed">Cerrar sesión</span>
-        </button>
-      </div>
-      <div class="content">
-        <h1>Bienvenido al sistema</h1>
-        <p>Gestiona las tarjetas de crédito desde el menú lateral.</p>
-        <a routerLink="/cards" class="btn-go">Ver Tarjetas →</a>
-      </div>
-    </div>
-  `
+  imports: [CommonModule, RouterLink, RouterLinkActive, ConfirmModalComponent],
+  templateUrl: './dashboard.component.html',
+  styleUrls: ['./dashboard.component.css']
 })
-export class DashboardComponent {
+export class DashboardComponent implements OnInit {
   isCollapsed = false;
+  showLogoutConfirm = false;
+  username: string = 'Usuario';
+  role: string = 'Cliente';
+  userInitial: string = 'U';
+
   constructor(private router: Router) {}
+
+  ngOnInit() {
+    const storedName = localStorage.getItem('username');
+    if (storedName) {
+      this.username = storedName;
+      this.userInitial = storedName.charAt(0).toUpperCase();
+    }
+    
+    const storedRole = localStorage.getItem('role');
+    if (storedRole) {
+      if (storedRole === 'admin') this.role = 'Administrador';
+      else if (storedRole === 'agente') this.role = 'Agente';
+      else this.role = 'Cliente';
+    }
+  }
+
+  promptLogout() {
+    this.showLogoutConfirm = true;
+  }
+
+  cancelLogout() {
+    this.showLogoutConfirm = false;
+  }
+
   logout() {
+    this.showLogoutConfirm = false;
     localStorage.removeItem('token');
+    localStorage.removeItem('role');
+    localStorage.removeItem('username');
     this.router.navigate(['/login']);
   }
-}
+}

@@ -9,8 +9,8 @@ export const routes: Routes = [
   },
   {
     path: 'dashboard',
-    loadComponent: () => import('./pages/dashboard/dashboard.component').then(m => m.DashboardComponent),
-    canActivate: [authGuard]
+    redirectTo: 'cards',
+    pathMatch: 'full'
   },
   {
     path: 'cards',
