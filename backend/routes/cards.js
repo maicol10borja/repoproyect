@@ -18,6 +18,11 @@ router.get('/', auth, async (req, res) => {
 // POST — solo admin y agente
 router.post('/', auth, requireRole('admin', 'agente'), async (req, res) => {
   try {
+    const existing = await Card.findOne({ cedula: req.body.cedula });
+    if (existing) {
+      return res.status(400).json({ message: 'Ya existe una tarjeta vinculada a esta cédula' });
+    }
+
     const issueDate = req.body.issueDate ? new Date(req.body.issueDate) : new Date();
     const expiryDate = new Date(issueDate);
     expiryDate.setFullYear(expiryDate.getFullYear() + 4);
@@ -49,6 +54,13 @@ router.post('/', auth, requireRole('admin', 'agente'), async (req, res) => {
 // PUT — solo admin y agente
 router.put('/:id', auth, requireRole('admin', 'agente'), async (req, res) => {
   try {
+    if (req.body.cedula) {
+      const existing = await Card.findOne({ cedula: req.body.cedula });
+      if (existing && existing._id.toString() !== req.params.id) {
+        return res.status(400).json({ message: 'Ya existe otra tarjeta vinculada a esta cédula' });
+      }
+    }
+
     const card = await Card.findById(req.params.id);
     if (!card) return res.status(404).json({ message: 'No encontrada' });
 
