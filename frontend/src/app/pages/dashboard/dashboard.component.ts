@@ -20,6 +20,10 @@ export class DashboardComponent implements OnInit {
   constructor(private router: Router) {}
 
   ngOnInit() {
+    if (typeof window !== 'undefined' && window.innerWidth <= 768) {
+      this.isCollapsed = true;
+    }
+    
     const storedName = localStorage.getItem('username');
     if (storedName) {
       this.username = storedName;

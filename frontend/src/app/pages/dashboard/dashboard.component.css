@@ -16,7 +16,7 @@
   height: 100vh;
   overflow: hidden;
   position: relative;
-  z-index: 100;
+  z-index: 1000;
 }
 
 .sidebar.collapsed {
@@ -317,4 +317,36 @@
 
 .sidebar.collapsed .btn-logout .icon {
   margin: 0;
+}
+
+/* Responsive sidebar for mobile */
+@media (max-width: 768px) {
+  .sidebar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 260px;
+    transform: translateX(0);
+  }
+
+  .sidebar.collapsed {
+    transform: translateX(-100%);
+    width: 260px;
+  }
+
+  .toggle-btn {
+    display: flex; /* Ensure it is visible to close the sidebar */
+  }
+
+  .sidebar.collapsed .brand-text,
+  .sidebar.collapsed .user-info,
+  .sidebar.collapsed .nav-title,
+  .sidebar.collapsed .label {
+    display: flex; /* Keep texts visible when sliding out */
+  }
+
+  .sidebar.collapsed .brand-text,
+  .sidebar.collapsed .nav-title {
+    opacity: 1;
+  }
 }

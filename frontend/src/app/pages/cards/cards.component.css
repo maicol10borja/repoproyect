@@ -41,9 +41,27 @@
   gap: 10px;
 }
 
-.top-bar h1 svg {
+.top-bar h1 svg.title-icon {
   color: #6366f1;
   flex-shrink: 0;
+}
+
+.mobile-menu-btn {
+  display: none; /* hidden on desktop */
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: #f1f5f9;
+  border-radius: 8px;
+  width: 36px;
+  height: 36px;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.mobile-menu-btn:hover {
+  background: rgba(255, 255, 255, 0.12);
 }
 
 .top-bar-right {
@@ -1202,8 +1220,8 @@ textarea.form-input {
   }
 }
 
-/* Mobile Responsiveness for Notifications */
-@media (max-width: 600px) {
+/* Mobile Responsiveness for Notifications and Layout */
+@media (max-width: 768px) {
   .notif-dropdown {
     position: fixed;
     top: 70px;
@@ -1214,6 +1232,20 @@ textarea.form-input {
     z-index: 1000;
   }
   
+  .mobile-menu-btn {
+    display: flex;
+  }
+
+  .title-icon {
+    display: none; /* Hide original icon to save space on mobile */
+  }
+
+  /* Make sure app-dashboard doesn't take space on mobile */
+  app-dashboard {
+    width: 0;
+    flex-shrink: 0;
+  }
+
   .toast-wrap {
     right: 15px;
     left: 15px;
@@ -1221,11 +1253,16 @@ textarea.form-input {
   }
   
   .content {
-    padding: 24px 15px; /* Reduce generous desktop padding */
+    padding: 20px 12px;
   }
 
   .top-bar {
-    padding: 16px 15px;
+    padding: 14px 12px;
+  }
+
+  .top-bar h1 {
+    font-size: 18px;
+    gap: 8px;
   }
 
   .modal {
@@ -1235,5 +1272,6 @@ textarea.form-input {
 
   .cards-grid {
     grid-template-columns: 1fr;
+    gap: 24px;
   }
 }
