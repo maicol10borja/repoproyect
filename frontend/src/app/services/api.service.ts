@@ -9,7 +9,7 @@ import { Observable, of } from 'rxjs';
 export class ApiService {
 
 
-  private base = 'https://tarjetas-backend.onrender.com/api';
+  private base = 'https://proyecto-card-5t69.onrender.com/api';
 
   constructor(
     private http: HttpClient,

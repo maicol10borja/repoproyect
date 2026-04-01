@@ -5,8 +5,7 @@ import { Router, RouterLink, RouterLinkActive } from '@angular/router';
 import { DashboardComponent } from '../dashboard/dashboard.component';
 import { ConfirmModalComponent } from '../../components/confirm-modal/confirm-modal.component';
 
-
-const BASE = 'https://tarjetas-backend.onrender.com/api';
+const BASE = 'https://proyecto-card-5t69.onrender.com/api';
 
 interface Notif {
   type: 'success' | 'info' | 'error';
